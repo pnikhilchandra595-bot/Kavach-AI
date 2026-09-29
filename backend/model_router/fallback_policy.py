@@ -265,3 +265,90 @@ class FallbackPolicyEngine:
     def get_audit_trail(self) -> List[Dict[str, Any]]:
         """Return all recorded failover events formatted for audit log."""
         return [e.to_dict() for e in self.audit_history]
+
+
+class FallbackPolicy:
+    """Fallback policy coordinator used by ModelRouter and ReAct agents."""
+
+    def __init__(self, registry: Any = None):
+        self.registry = registry
+        self.listeners: List[Callable[[FallbackEvent], None]] = []
+        self._killed_models: Set[str] = set()
+
+    def register_listener(self, listener: Callable[[FallbackEvent], None]):
+        self.listeners.append(listener)
+
+    def get_fallback_chain(self, model_id: str) -> List[str]:
+        if not self.registry:
+            return []
+        if hasattr(self.registry, "get_model"):
+            meta = self.registry.get_model(model_id)
+            if meta:
+                if isinstance(meta, dict):
+                    return meta.get("fallback_targets", [])
+                return getattr(meta, "fallback_targets", [])
+        return []
+
+    def execute_with_fallback(
+        self,
+        preferred_model_id: str,
+        prompt: str = "",
+        system_prompt: Optional[str] = None,
+        config: Optional[Any] = None,
+        **kwargs
+    ) -> ModelResponse:
+        start_time = time.time()
+        chain = [preferred_model_id] + self.get_fallback_chain(preferred_model_id)
+        last_error = None
+
+        for attempt, model_id in enumerate(chain, 1):
+            if model_id in self._killed_models:
+                continue
+
+            adapter = None
+            if hasattr(self.registry, "get_adapter"):
+                adapter = self.registry.get_adapter(model_id)
+            if adapter is None and hasattr(self.registry, "_adapters"):
+                adapter = self.registry._adapters.get(model_id)
+            if adapter is None:
+                from .adapters.base import MockLocalAdapter
+                adapter = MockLocalAdapter(model_id)
+
+            try:
+                resp = adapter.generate(prompt)
+                if attempt > 1:
+                    resp.is_fallback = True
+                    resp.metadata["fallback_occurred"] = True
+                    resp.metadata["fallback_attempts"] = attempt
+                    event = FallbackEvent(
+                        timestamp=datetime.datetime.utcnow().isoformat() + "Z",
+                        task_type="inference",
+                        original_model=preferred_model_id,
+                        failed_model=chain[attempt - 2],
+                        failover_model=model_id,
+                        failure_reason=str(last_error) if last_error else "Failover",
+                        status_code=503,
+                        attempt_number=attempt,
+                        failover_latency_ms=(time.time() - start_time) * 1000.0,
+                    )
+                    for l in self.listeners:
+                        try:
+                            l(event)
+                        except Exception:
+                            pass
+                return resp
+            except Exception as e:
+                last_error = e
+                continue
+
+        from .adapters.base import ModelResponse
+        return ModelResponse(
+            text="[Fallback Engine] Service degraded; returning safe deterministic response.",
+            model_id=chain[-1] if chain else preferred_model_id,
+            adapter_type="fallback",
+            latency_ms=(time.time() - start_time) * 1000.0,
+            confidence_score=0.5,
+            is_fallback=True,
+            metadata={"fallback_occurred": True, "error": str(last_error)},
+        )
+

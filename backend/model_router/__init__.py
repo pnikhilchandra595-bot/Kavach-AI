@@ -15,6 +15,7 @@ from .provenance import (
     TamperedModelWeightError,
 )
 from .fallback_policy import (
+    FallbackPolicy,
     FallbackPolicyEngine,
     FallbackEvent,
     FallbackExhaustedError,
@@ -46,6 +47,7 @@ __all__ = [
     "VersionRollbackError",
     "ProvenanceVerifier",
     "TamperedModelWeightError",
+    "FallbackPolicy",
     "FallbackPolicyEngine",
     "FallbackEvent",
     "FallbackExhaustedError",

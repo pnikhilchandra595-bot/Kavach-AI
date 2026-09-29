@@ -174,12 +174,24 @@ class MockLocalAdapter(BaseModelAdapter):
     def __init__(self, model_id: str, config: Optional[Dict[str, Any]] = None):
         super().__init__(model_id, config)
         self.registered_responses: Dict[str, str] = {}
+        self.failure_injected: Optional[str] = None
+
+    def inject_failure(self, failure_type: str = "OOM"):
+        self.failure_injected = failure_type
 
     def register_response(self, pattern: str, response: str):
         """Register a canned response triggered when pattern is in prompt."""
         self.registered_responses[pattern.lower().strip()] = response
 
     def generate(self, prompt: str, options: Optional[Dict[str, Any]] = None) -> ModelResponse:
+        if self.failure_injected == "OOM":
+            self.failure_injected = None
+            raise OutOfMemoryError(
+                "CUDA Out of Memory: GPU VRAM limit reached (simulated)",
+                self.model_id,
+                "mock",
+                503
+            )
         p_lower = prompt.lower()
         for pat, resp in self.registered_responses.items():
             if pat in p_lower:

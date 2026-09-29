@@ -1,3 +1,0 @@
-# SIH26117 Sovereign On-Premise Agentic AI Workbench - P2 Requirements
-# All core functionality runs with standard library in air-gapped environments.
-pyyaml>=6.0.1

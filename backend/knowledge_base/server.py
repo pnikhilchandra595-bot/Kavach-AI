@@ -22,7 +22,7 @@ app = FastAPI(
 # Enable CORS for local Vite frontend on localhost:5173
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -122,5 +122,6 @@ def reingest():
 
 if __name__ == "__main__":
     import uvicorn
-    # Bind exclusively to 127.0.0.1 loopback
-    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info")
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", 8001))
+    uvicorn.run(app, host=host, port=port, log_level="info")

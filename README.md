@@ -7,45 +7,28 @@
 ## 1. System Architecture
 
 ```
-sovereign-workbench/
-├── model_router/
-│   ├── router.py              # task classifier → model selection
-│   ├── model_registry.yaml    # pluggable model configs, versioned with rollback support
-│   ├── registry_manager.py    # hardware tier detection, snapshots, and version rollback
-│   ├── provenance.py          # load-time cryptographic checksum & tamper rejection
-│   ├── fallback_policy.py     # OOM / crash detection, automatic tiered failover, audit logs
-│   ├── cascade.py             # [Stretch] draft-model → escalate-to-large-model optimization
-│   └── adapters/              # per-model inference adapters (vLLM/Ollama/llama.cpp/Mock)
-├── agent_core/
-│   ├── planner.py             # multi-step task planning (ReAct/plan-execute loop)
-│   ├── tool_executor.py       # dispatches to local tools, schema-constrained tool calls
-│   ├── memory.py              # task state, scratchpad, iteration history
-│   ├── approval_gate.py       # human-in-the-loop checkpoint, RBAC-aware
-│   └── guardrails.py          # input/output validation, prompt-injection screening
-├── tools/
-│   ├── file_io.py              # read/write local files
-│   ├── code_sandbox.py         # isolated code execution (Docker/firejail)
-│   ├── spreadsheet.py          # openpyxl-based Excel manipulation
-│   ├── doc_generator.py        # Word/PPT/Excel output generation
-│   └── knowledge_search.py     # local RAG over SOPs/manuals/correspondence
-├── multimodal/
-│   ├── ocr_engine.py           # on-device OCR (Tesseract/PaddleOCR)
-│   ├── vision_model.py         # local VLM for P&ID/drawing/handwriting understanding
-│   └── document_ingest.py       # scanned PDF → structured text pipeline
-├── knowledge_base/
-│   ├── ingest.py               # SOP/manual ingestion, sensitivity tagging
-│   ├── vector_store/           # local embedding store (Chroma/Qdrant, self-hosted)
-│   └── drift_check.py          # flags stale chunks against newer source documents
-├── network_isolation/
-│   ├── firewall_rules.sh       # deny-all-outbound enforcement
-│   └── traffic_monitor.py      # live proof-of-sovereignty dashboard
-├── observability/
-│   ├── audit_log.py            # append-only, tamper-evident action log
-│   ├── metrics.py              # latency, throughput, router accuracy, SLA breach flags
-│   └── eval_harness/
-│       ├── router_eval.py      # labeled task set → measures routing accuracy
-│       └── load_test.py        # [Stretch] concurrent-task latency/throughput profiling
-└── tests/                      # automated unit and integration test suite
+Kavach-AI/
+├── frontend/                  # React + Vite + Tailwind Dashboard
+│   ├── src/
+│   │   ├── components/        # Agentic, KnowledgeBase, Router, Audit, Eval components
+│   │   └── context/           # WorkbenchContext state management
+│   ├── .env.example           # VITE_API_URL configuration
+│   └── package.json
+│
+├── backend/                   # Python FastAPI Backend & Intelligence Core
+│   ├── main.py                # Unified FastAPI Web Service entrypoint
+│   ├── Procfile               # Cloud deployment process declaration
+│   ├── Dockerfile             # Containerized deployment spec
+│   ├── requirements.txt       # Dependencies (fastapi, uvicorn, pydantic, pyyaml)
+│   ├── agent_core/            # Multi-agent ReAct planner, memory, approval gates
+│   ├── auth/                  # RBAC manager & permissions
+│   ├── knowledge_base/        # Local RAG vector store, synthetic corpus & server
+│   ├── model_router/          # Adaptive model routing, fallback & registry
+│   ├── observability/         # Eval harness & load testing
+│   └── tests/                 # Automated test suite
+│
+├── docs/                      # Technical documentation & architecture specs
+└── render.yaml                # Render Blueprint infrastructure-as-code
 ```
 
 ---
@@ -103,23 +86,60 @@ This repository implements the complete **P2 (Model Infrastructure Engineer)** t
 
 ---
 
-## 3. Quick Start & Verification
+## 3. Local Development & Verification
 
-### Prerequisites
-Python 3.10+ (Standard library only; optional `pyyaml` for YAML parsing).
-
-### Run Automated Unit Tests (100% Pass Rate)
+### Running the Backend Locally
 ```bash
+cd backend
+pip install -r requirements.txt
+python main.py
+# or: uvicorn main:app --reload --port 8000
+```
+Backend will be live at `http://127.0.0.1:8000` with interactive docs at `http://127.0.0.1:8000/docs`.
+
+### Running the Frontend Locally
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Frontend will be live at `http://127.0.0.1:5173`.
+
+### Run Automated Unit Tests
+```bash
+cd backend
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
 
-### Run Live Judge-Defense Demonstration
-```bash
-python run_p2_demo.py
-```
+---
 
-### Run Router Benchmark & Load Profiler
-```bash
-python observability/eval_harness/router_eval.py
-python observability/eval_harness/load_test.py
+## 4. Deploying the Backend to Render
+
+You can deploy the backend to [Render](https://render.com) in 2 simple ways:
+
+### Option A: Manual Web Service Setup (Recommended)
+1. In your **Render Dashboard**, click **New +** → **Web Service**.
+2. Connect your GitHub repository (`https://github.com/pnikhilchandra595-bot/Kavach-AI`).
+3. Fill in the following settings:
+   - **Name**: `kavach-ai-backend` (or your preferred name)
+   - **Region**: Oregon (US West) or closest region
+   - **Branch**: `main`
+   - **Root Directory**: `backend` *(Important!)*
+   - **Runtime**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - **Instance Type**: `Free`
+4. Click **Create Web Service**.
+5. Once deployed, Render will provide a public URL like `https://kavach-ai-backend.onrender.com`.
+
+### Option B: Render Blueprint (1-Click via `render.yaml`)
+1. In Render Dashboard, click **New +** → **Blueprint**.
+2. Connect your repository (`pnikhilchandra595-bot/Kavach-AI`).
+3. Render will read [`render.yaml`](file:///c:/Users/Nikhil%20Chandra/Downloads/SIH26117-main/render.yaml) and automatically configure the service, build command, and start command.
+4. Click **Apply**.
+
+### Connecting Frontend to Deployed Backend
+In `frontend/.env` (or in your frontend hosting settings like Vercel / Render Static Site), set:
+```env
+VITE_API_URL=https://your-backend-service.onrender.com
 ```

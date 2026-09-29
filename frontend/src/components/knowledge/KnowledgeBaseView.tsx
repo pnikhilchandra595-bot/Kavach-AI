@@ -50,10 +50,12 @@ export const KnowledgeBaseView: React.FC = () => {
     { id: 'pumps', label: 'Pump Vibration Trips', query: 'Centrifugal pump ISO 10816 vibration velocity trip limits and seal pressure', targetDoc: 'MRPL-MAN-PMP-112' },
   ];
 
-  // Check health of local Python service on 127.0.0.1:8001
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8001';
+
+  // Check health of backend Python service
   const checkBackendHealth = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8001/health', { method: 'GET', signal: AbortSignal.timeout(1500) });
+      const res = await fetch(`${API_BASE_URL}/health`, { method: 'GET', signal: AbortSignal.timeout(2000) });
       if (res.ok) {
         setIsLiveApiOnline(true);
         return true;
@@ -77,7 +79,7 @@ export const KnowledgeBaseView: React.FC = () => {
     if (isOnline) {
       try {
         const start = performance.now();
-        const res = await fetch('http://127.0.0.1:8001/query', {
+        const res = await fetch(`${API_BASE_URL}/query`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: queryText, top_k: 3 }),
@@ -177,7 +179,7 @@ export const KnowledgeBaseView: React.FC = () => {
                     ? 'bg-emerald-950 text-emerald-300 border-emerald-800' 
                     : 'bg-industrial-800 text-slate-300 border-industrial-700'
                 }`}>
-                  {isLiveApiOnline ? 'PYTHON RAG ENGINE: 127.0.0.1:8001' : 'AIRGAPPED LOCAL INDEX: ACTIVE'}
+                  {isLiveApiOnline ? 'PYTHON RAG ENGINE: ONLINE' : 'AIRGAPPED LOCAL INDEX: ACTIVE'}
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -367,7 +369,7 @@ export const KnowledgeBaseView: React.FC = () => {
               </span>
               {liveCitations && (
                 <span className="text-[10px] font-mono text-cyan-400">
-                  Direct from Python 127.0.0.1:8001
+                  Direct from Python RAG Service
                 </span>
               )}
             </div>

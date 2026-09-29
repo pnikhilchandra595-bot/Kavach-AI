@@ -20,16 +20,12 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
-# Import backend modules
-try:
-    from knowledge_base.vector_store import LocalVectorStore
-    from knowledge_base.retriever import SovereignRetriever
-    from knowledge_base.ingest import run_ingestion
-    from model_router.registry import ModelRegistry
-    from model_router.router import ModelRouter
-    from agent_core.planner import ReActPlanner
-except ImportError as e:
-    print(f"Warning during module import: {e}")
+from knowledge_base.vector_store import LocalVectorStore
+from knowledge_base.retriever import SovereignRetriever
+from knowledge_base.ingest import run_ingestion
+from model_router.registry import ModelRegistry
+from model_router.router import ModelRouter
+from agent_core.planner import ReActPlanner
 
 app = FastAPI(
     title="Kavach-AI Sovereign Backend API",
@@ -189,12 +185,15 @@ def list_models():
     models = []
     for model_id, meta in model_registry.models.items():
         models.append({
-            "model_id": model_id,
-            "tier": meta.tier.value if hasattr(meta.tier, "value") else str(meta.tier),
-            "size_b": meta.size_b,
+            "model_id": meta.id,
+            "name": meta.name,
+            "capabilities": meta.capabilities,
+            "adapter_type": meta.adapter_type,
             "quantization": meta.quantization,
-            "status": meta.status.value if hasattr(meta.status, "value") else str(meta.status),
-            "vram_required_mb": meta.vram_required_mb
+            "priority": meta.priority,
+            "vram_required_gb": meta.vram_required_gb,
+            "status": meta.status,
+            "fallback_targets": meta.fallback_targets
         })
     return {"count": len(models), "models": models}
 
@@ -204,9 +203,11 @@ def route_task(req: RouteRequest):
     decision = model_router.route(req.task)
     return {
         "task": req.task,
-        "selected_model": decision.selected_model.model_id if decision.selected_model else None,
-        "intent": decision.intent.value if hasattr(decision.intent, "value") else str(decision.intent),
-        "reasoning": decision.reasoning
+        "selected_model_id": decision.selected_model_id,
+        "task_type": decision.task_type,
+        "confidence": decision.confidence,
+        "rationale": decision.rationale,
+        "fallback_chain": decision.fallback_chain
     }
 
 

@@ -151,3 +151,87 @@ class BaseModelAdapter(ABC):
     @abstractmethod
     def get_adapter_type(self) -> str:
         return "base"
+
+
+@dataclass
+class GenerationConfig:
+    """Generation parameters for model adapters."""
+    temperature: float = 0.1
+    max_tokens: int = 2048
+    top_p: float = 0.95
+    stop: Optional[List[str]] = None
+    timeout: float = 90.0
+    extra: Dict[str, Any] = field(default_factory=dict)
+
+
+# Backward compatibility alias
+ModelAdapter = BaseModelAdapter
+
+
+class MockLocalAdapter(BaseModelAdapter):
+    """Local deterministic simulation adapter for testing and airgapped environments."""
+
+    def __init__(self, model_id: str, config: Optional[Dict[str, Any]] = None):
+        super().__init__(model_id, config)
+        self.registered_responses: Dict[str, str] = {}
+
+    def register_response(self, pattern: str, response: str):
+        """Register a canned response triggered when pattern is in prompt."""
+        self.registered_responses[pattern.lower().strip()] = response
+
+    def generate(self, prompt: str, options: Optional[Dict[str, Any]] = None) -> ModelResponse:
+        p_lower = prompt.lower()
+        for pat, resp in self.registered_responses.items():
+            if pat in p_lower:
+                return ModelResponse(
+                    text=resp,
+                    model_id=self.model_id,
+                    adapter_type="mock",
+                    latency_ms=12.0,
+                    confidence_score=0.95
+                )
+
+        if "code" in p_lower or "python" in p_lower:
+            text = "```python\n# Simulated python solution\ndef solve(): pass\n```"
+        elif "p&id" in p_lower or "diagram" in p_lower:
+            text = "P&ID inspection: 10-P-101A crude pump isolation valve normal."
+        else:
+            text = f"Simulated output from {self.model_id} for prompt: {prompt[:60]}..."
+
+        return ModelResponse(
+            text=text,
+            model_id=self.model_id,
+            adapter_type="mock",
+            latency_ms=15.0,
+            confidence_score=0.90
+        )
+
+    def generate_chat(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+        options: Optional[Dict[str, Any]] = None,
+    ) -> ModelResponse:
+        last_msg = messages[-1].get("content", "") if messages else ""
+        return self.generate(last_msg, options)
+
+    def generate_multimodal(
+        self,
+        prompt: str,
+        image_bytes: Optional[bytes] = None,
+        image_path: Optional[str] = None,
+        options: Optional[Dict[str, Any]] = None,
+    ) -> ModelResponse:
+        return self.generate(prompt, options)
+
+    def health_check(self) -> HealthStatus:
+        return HealthStatus(
+            is_healthy=True,
+            status_code=200,
+            message="Mock local adapter online",
+            latency_ms=0.5
+        )
+
+    def get_adapter_type(self) -> str:
+        return "mock"
+

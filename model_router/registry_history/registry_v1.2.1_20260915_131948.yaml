@@ -1,0 +1,178 @@
+schema_version: 2.1.0
+registry_version: 1.2.1
+last_updated: '2026-09-15T13:19:48.786632Z'
+description: Sovereign Air-Gapped Model Registry for MRPL Smart Automation
+hardware_tiers:
+  degraded:
+    max_vram_mb: 4096
+    description: Laptop / Ultra-constrained Edge (e.g., RTX 3050 4GB). Forces 4-bit
+      quantized minimal models.
+  minimum:
+    max_vram_mb: 12288
+    description: Standard venue fallback (8-12GB VRAM). Runs 14B Q4 or 7B unquantized.
+  recommended:
+    max_vram_mb: 24576
+    description: Enterprise Workstation (16-24GB VRAM). Runs 32B AWQ / 14B models
+      comfortably.
+  stretch:
+    max_vram_mb: 49152
+    description: Dedicated Server Node (48GB+ VRAM). Full 72B / multi-model concurrent
+      serving.
+models:
+  qwen2.5-72b-instruct:
+    family: qwen
+    adapter: vllm
+    quantization: awq
+    context_window: 32768
+    vram_required_mb: 42000
+    min_ram_mb: 65536
+    tier: stretch
+    strengths:
+    - planning
+    - complex_reasoning
+    - sop_qa
+    - cross_model_verification
+    served_model_name: Qwen/Qwen2.5-72B-Instruct-AWQ
+    weights_path: models/weights/qwen2.5-72b-awq.safetensors
+    expected_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  qwen2.5-32b-awq:
+    family: qwen
+    adapter: vllm
+    quantization: awq
+    context_window: 32768
+    vram_required_mb: 19500
+    min_ram_mb: 32768
+    tier: recommended
+    strengths:
+    - planning
+    - summarization
+    - sop_qa
+    - approval_note_drafting
+    served_model_name: Qwen/Qwen2.5-32B-Instruct-AWQ
+    weights_path: models/weights/qwen2.5-32b-awq.safetensors
+    expected_sha256: f5a5704f12485e3be1e83f7779fdd293435b1815e14b06f3203d0f6a994e4125
+  qwen2.5-14b-q4:
+    family: qwen
+    adapter: ollama
+    quantization: q4_k_m
+    context_window: 32768
+    vram_required_mb: 9200
+    min_ram_mb: 16384
+    tier: minimum
+    strengths:
+    - planning
+    - summarization
+    - sop_qa
+    ollama_model_tag: qwen2.5:14b-instruct-q4_K_M
+    weights_path: models/weights/qwen2.5-14b-q4.gguf
+    expected_sha256: 9a2f64d4b1a43a890ef99292c3a5e8e894bf42b93801f114c0a5202a3a5f973e
+  qwen2.5-7b-q4:
+    family: qwen
+    adapter: mock
+    quantization: q4_k_m
+    context_window: 8192
+    vram_required_mb: 3800
+    min_ram_mb: 8192
+    tier: degraded
+    strengths:
+    - summarization
+    - quick_extraction
+    - drafting_fallback
+    ollama_model_tag: qwen2.5:7b-instruct-q4_K_M
+    weights_path: models/weights/qwen2.5-7b-q4.gguf
+    expected_sha256: 3f82a93b4e18d6e3c50989f664df0d7c5885e33d36e2f132e48e890c29b9f712
+  qwen2.5-coder-14b:
+    family: qwen-coder
+    adapter: ollama
+    quantization: q4_k_m
+    context_window: 32768
+    vram_required_mb: 9500
+    min_ram_mb: 16384
+    tier: recommended
+    strengths:
+    - coding
+    - sql_analytics
+    - sandbox_scripting
+    ollama_model_tag: qwen2.5-coder:14b-instruct-q4_K_M
+    weights_path: models/weights/qwen2.5-coder-14b.gguf
+    expected_sha256: b45c23a7e58913d98762ef10924ac33b2185c7f8a32904c10efc68128362489e
+  deepseek-coder-7b:
+    family: deepseek
+    adapter: mock
+    quantization: q4_k_m
+    context_window: 16384
+    vram_required_mb: 4200
+    min_ram_mb: 8192
+    tier: minimum
+    strengths:
+    - coding
+    - sql_analytics
+    - quick_patching
+    ollama_model_tag: deepseek-coder:6.7b-instruct-q4_K_M
+    weights_path: models/weights/deepseek-coder-7b.gguf
+    expected_sha256: a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0
+  qwen2.5-vl-7b-instruct:
+    family: qwen-vl
+    adapter: mock
+    quantization: q4_k_m
+    context_window: 8192
+    vram_required_mb: 6800
+    min_ram_mb: 16384
+    tier: minimum
+    strengths:
+    - vision_ocr
+    - pid_diagram_reading
+    - handwriting_extraction
+    served_model_name: Qwen/Qwen2.5-VL-7B-Instruct
+    weights_path: models/weights/qwen2.5-vl-7b.safetensors
+    expected_sha256: c789123456abcdef7890abcdef1234567890abcdef1234567890abcdef123456
+  llava-1.6-mistral-7b:
+    family: llava
+    adapter: llamacpp
+    quantization: q4_k_m
+    context_window: 8192
+    vram_required_mb: 6500
+    min_ram_mb: 12288
+    tier: minimum
+    strengths:
+    - vision_ocr
+    - photo_inspection
+    - pid_diagram
+    llamacpp_model_path: models/weights/llava-1.6-mistral-7b-q4.gguf
+    weights_path: models/weights/llava-1.6-mistral-7b-q4.gguf
+    expected_sha256: b45a6c7d8e9f0123456789abcdef0123456789abcdef0123456789abcdef0123
+  mock-universal-agent:
+    family: mock
+    adapter: mock
+    quantization: none
+    context_window: 32768
+    vram_required_mb: 0
+    min_ram_mb: 0
+    tier: degraded
+    strengths:
+    - planning
+    - complex_reasoning
+    - coding
+    - code
+    - vision
+    - vision_ocr
+    - summarization
+    - sop_qa
+    - cross_model_verification
+    served_model_name: Mock Universal Local Model
+  qwen2.5-coder-32b:
+    family: qwen
+    adapter: vllm
+    quantization: awq
+    context_window: 32768
+    vram_required_mb: 19500
+    min_ram_mb: 32768
+    tier: recommended
+    strengths:
+    - coding
+    - code
+    - sql_analysis
+    - scripting
+    served_model_name: Qwen/Qwen2.5-Coder-32B-Instruct
+    weights_path: models/weights/qwen2.5-coder-32b-awq.safetensors
+    expected_sha256: 4567890abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123

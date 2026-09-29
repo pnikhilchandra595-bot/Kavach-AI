@@ -1,0 +1,93 @@
+import type { TaskItem } from '../types';
+
+export const INITIAL_TASKS: TaskItem[] = [
+  {
+    id: 'TSK-1042',
+    title: 'Crude Column CRU-C-101 Ultrasonic Inspection & RUL Evaluation',
+    category: 'Equipment Integrity',
+    status: 'PENDING_APPROVAL',
+    progress: 85,
+    assignedModel: 'Qwen2.5-32B + Qwen2.5-VL-7B',
+    operator: 'M. Sharma (NDT Level II)',
+    startTime: '2026-09-15 12:40:15',
+    safetyLevel: 'CRITICAL',
+    deliverableName: 'MRPL_Approval_Note_CRU_C101_2026.docx',
+    associatedScenarioId: 'scenario-2-e2e-inspection',
+    summary: 'Detected 7.82mm wall thickness at Tray 14. Paused at Human Approval Gate for two-person supervisor sign-off to reduce turnaround interval to 18 months.'
+  },
+  {
+    id: 'TSK-1041',
+    title: 'ASME Section VIII Div 1 Shell Thickness Verification',
+    category: 'Isolated Code Sandbox',
+    status: 'COMPLETED',
+    progress: 100,
+    assignedModel: 'Qwen2.5-Coder-14B',
+    operator: 'A. Hegde (PV Engineering)',
+    startTime: '2026-09-15 12:35:00',
+    endTime: '2026-09-15 12:35:03',
+    duration: '2.1s',
+    safetyLevel: 'HIGH',
+    deliverableName: 'asme_shell_calc.py',
+    associatedScenarioId: 'scenario-3-code-sandbox',
+    summary: 'Executed Python script in isolated Docker sandbox without network access. Computed minimum shell thickness = 25.91 mm.'
+  },
+  {
+    id: 'TSK-1040',
+    title: 'P&ID Line 34B Relief Redundancy Verification',
+    category: 'Multimodal Vision',
+    status: 'COMPLETED',
+    progress: 100,
+    assignedModel: 'Qwen2.5-VL-7B',
+    operator: 'R. Bhat (Operations)',
+    startTime: '2026-09-15 12:20:10',
+    endTime: '2026-09-15 12:20:14',
+    duration: '3.4s',
+    safetyLevel: 'CRITICAL',
+    deliverableName: 'DWG-CRU-044_Audit.json',
+    associatedScenarioId: 'scenario-4-pid-analysis',
+    summary: 'Parsed ISA 5.1 instrumentation tags. Confirmed twin 100% staggered safety valves PSV-104A/B set at 18.5 barg.'
+  },
+  {
+    id: 'TSK-1039',
+    title: 'Heat Exchanger E-104 Bundle Tube Plugging Assessment',
+    category: 'Thermal Integration',
+    status: 'COMPLETED',
+    progress: 100,
+    assignedModel: 'Qwen2.5-32B-Instruct',
+    operator: 'S. Rao (Technical Services)',
+    startTime: '2026-09-15 11:50:00',
+    endTime: '2026-09-15 11:50:02',
+    duration: '1.8s',
+    safetyLevel: 'STANDARD',
+    deliverableName: 'E104_Plugging_Summary.xlsx',
+    summary: 'Verified 42 plugged tubes out of 640 total (6.56%), within the 10.0% allowable ceiling per MRPL-MAN-HEX-220.'
+  },
+  {
+    id: 'TSK-1043',
+    title: 'Scanned Shift Handover Log Ingestion & Threat Sanitization',
+    category: 'Guardrails & OCR',
+    status: 'NEUTRALIZED',
+    progress: 100,
+    assignedModel: 'Guardrail Engine + Qwen2.5-32B',
+    operator: 'R. Kumar (CDU Shift Engineer)',
+    startTime: '2026-09-15 12:45:22',
+    endTime: '2026-09-15 12:45:24',
+    duration: '1.4s',
+    safetyLevel: 'HIGH',
+    deliverableName: 'Sanitized_Shift_Log_0912.txt',
+    associatedScenarioId: 'scenario-7-prompt-injection-defense',
+    summary: 'Detected embedded prompt-injection directive in handwritten scan. Malicious command stripped; valid pump pressure (4.2 bar) logged.'
+  },
+  {
+    id: 'TSK-1044',
+    title: 'Flare Header Continuous Sweep Purge Velocity Calculation',
+    category: 'Offsites & Safety',
+    status: 'QUEUED',
+    progress: 0,
+    assignedModel: 'Qwen2.5-Coder-14B',
+    operator: 'K. Pai (Utilities Lead)',
+    startTime: '2026-09-15 12:50:00',
+    safetyLevel: 'HIGH',
+    summary: 'Queued calculation to verify nitrogen sweep velocity >= 0.15 m/s across 42-inch main header per MRPL-SOP-FLR-001.'
+  }
+];

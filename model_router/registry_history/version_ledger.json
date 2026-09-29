@@ -1,0 +1,44 @@
+[
+  {
+    "version": "1.2.0",
+    "filename": "registry_v1.2.0_20260915_121401.yaml",
+    "created_at": "2026-09-15T12:14:01.345786Z",
+    "reason": "Prior to updating qwen2.5-14b-q4: Extend context for refinery maintenance manual ingestion",
+    "author": "shift_engineer_04"
+  },
+  {
+    "version": "1.2.1",
+    "filename": "registry_v1.2.1_20260915_121401.yaml",
+    "created_at": "2026-09-15T12:14:01.359793Z",
+    "reason": "Pre-rollback backup before restoring v1.2.0",
+    "author": "refinery_supervisor"
+  },
+  {
+    "version": "1.2.0",
+    "filename": "registry_v1.2.0_20260915_121520.yaml",
+    "created_at": "2026-09-15T12:15:20.522960Z",
+    "reason": "Prior to updating qwen2.5-14b-q4: Extend context for refinery maintenance manual ingestion",
+    "author": "shift_engineer_04"
+  },
+  {
+    "version": "1.2.1",
+    "filename": "registry_v1.2.1_20260915_121520.yaml",
+    "created_at": "2026-09-15T12:15:20.527712Z",
+    "reason": "Pre-rollback backup before restoring v1.2.0",
+    "author": "refinery_supervisor"
+  },
+  {
+    "version": "1.2.0",
+    "filename": "registry_v1.2.0_20260915_131948.yaml",
+    "created_at": "2026-09-15T13:19:48.785692Z",
+    "reason": "Prior to updating qwen2.5-14b-q4: Extend context for refinery maintenance manual ingestion",
+    "author": "shift_engineer_04"
+  },
+  {
+    "version": "1.2.1",
+    "filename": "registry_v1.2.1_20260915_131948.yaml",
+    "created_at": "2026-09-15T13:19:48.809278Z",
+    "reason": "Pre-rollback backup before restoring v1.2.0",
+    "author": "refinery_supervisor"
+  }
+]
